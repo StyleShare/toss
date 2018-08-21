@@ -1,0 +1,2 @@
+class TossPayment:
+    pass
