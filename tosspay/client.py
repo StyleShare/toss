@@ -42,7 +42,8 @@ class TossPayClient:
         try:
             jsonized = result.json()
         except json.decoder.JSONDecodeError:
-            return ErrorResponse('unsupported api response', response=result.text)
+            return ErrorResponse('unsupported api response',
+                                 response=result.text)
 
         return APIResponse(**jsonized)
 
