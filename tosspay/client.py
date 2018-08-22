@@ -6,7 +6,7 @@ import pytz
 import requests
 
 from tosspay.exc import NotAutoExecutable
-from tosspay.response import APIResponse, ErrorResponse
+from tosspay.response import APIResponse, APIError
 from tosspay.validator import validate_order_number
 
 
@@ -42,8 +42,8 @@ class TossPayClient:
         try:
             jsonized = result.json()
         except json.decoder.JSONDecodeError:
-            return ErrorResponse('unsupported api response',
-                                 response=result.text)
+            return APIError('unsupported api response',
+                            response=result.text)
 
         return APIResponse(**jsonized)
 
