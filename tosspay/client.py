@@ -2,11 +2,13 @@ import datetime
 import json
 from urllib.parse import urljoin
 
+import inflection
 import pytz
 import requests
 
+from tosspay.entity import Payment
 from tosspay.exc import NotAutoExecutable
-from tosspay.response import APIResponse, APIError
+from tosspay.response import APIResponse, APIError, PurchaseResult
 from tosspay.validator import validate_order_number
 
 
@@ -95,4 +97,22 @@ class TossPayClient:
                 filtered[k] = v
 
         result = self.request('post', 'payments', filtered)
-        return result
+
+        if result.data['code'] == -1:
+            return result
+
+        return PurchaseResult(pay_token=result.data["payToken"],
+                              purchase_url=result.data["checkoutPage"],
+                              client=self,
+                              code=result.data["code"])
+
+    def get_payment(self, pay_token=None, order_no=None):
+        if not pay_token and order_no:
+            raise ValueError("`pay_token` or `order_no` is necessary")
+
+        result = self.request('post', 'status', {'payToken': pay_token})
+
+        params = dict((inflection.underscore(k), v)
+                      for k, v in result.data.items())
+
+        return Payment(**params)
