@@ -9,7 +9,7 @@ import requests
 from tosspay.entity import Payment
 from tosspay.exc import NotAutoExecutable
 from tosspay.response import (ApprovedResult, APIResponse, APIError,
-                              PurchaseResult, CancelledResult)
+                              PurchaseResult, CancelledResult, RefundedResult)
 from tosspay.validator import validate_order_number
 
 
@@ -40,7 +40,13 @@ class TossPayClient:
 
     def request(self, method, uri, params):
         params['apiKey'] = self.api_key
-        result = getattr(requests, method)(self.build_url(uri), data=params)
+
+        filtered = {}
+        for k, v in params.items():
+            if v is not None:
+                filtered[k] = v
+
+        result = getattr(requests, method)(self.build_url(uri), data=filtered)
 
         try:
             jsonized = result.json()
@@ -91,13 +97,7 @@ class TossPayClient:
             "retCancelUrl": ret_cancel_url or None
         }
 
-        filtered = {}
-
-        for k, v in basic_params.items():
-            if v is not None:
-                filtered[k] = v
-
-        result = self.request('post', 'payments', filtered)
+        result = self.request('post', 'payments', basic_params)
 
         if result.data['code'] == -1:
             return result
@@ -145,3 +145,23 @@ class TossPayClient:
             return result
 
         return CancelledResult(code=result.data['code'])
+
+    def refund(self, pay_token, amount, amount_tax_free, refund_no=None,
+               reason=None,
+               amount_taxable=None,
+               amount_vat=None, amount_service_fee=None):
+
+        params = {'payToken': pay_token, 'refundNo': refund_no,
+                  'reason': reason, 'amount': amount,
+                  'amountTaxable': amount_taxable,
+                  'amountTaxFree': amount_tax_free, 'amountVat': amount_vat,
+                  'amountServiceFee': amount_service_fee}
+
+        result = self.request('post', 'refunds', params)
+
+        if result.data['code'] == -1:
+            return result
+
+        return RefundedResult(code=result.data['code'],
+                              refund_no=result.data['refundNo'],
+                              approved_at=result.data['approvalTime'])

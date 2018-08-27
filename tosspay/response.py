@@ -39,3 +39,12 @@ class ApprovedResult(APIResponse):
 class CancelledResult(APIResponse):
 
     pass
+
+
+class RefundedResult(APIResponse):
+
+    def __init__(self, code, refund_no, approved_at, **kwargs):
+        self.code = code
+        self.refund_no = refund_no
+        self.approved_at = approved_at
+        super(RefundedResult, self).__init__(**kwargs)
