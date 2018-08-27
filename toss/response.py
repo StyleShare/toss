@@ -1,18 +1,18 @@
-from toss.entity import Payment
+from toss.exc import TossPayException
 
 
 class APIResponse:
 
     def __new__(cls, *args, **kwargs):
         if kwargs["code"] == -1:
-            return super(cls, APIError).__new__(APIError)
+            raise super(cls, APIError).__new__(APIError)
         return super(APIResponse, cls).__new__(cls)
 
     def __init__(self, **kwargs):
         self.data = kwargs
 
 
-class APIError(APIResponse):
+class APIError(APIResponse, TossPayException):
 
     def __init__(self, msg: str, **kwargs):
         self.msg = msg

@@ -11,7 +11,7 @@ class Payment(BaseEntity):
     def __init__(self, pay_token: str, pay_status: str, order_no: str,
                  amount: int,
                  amount_taxable: int, amount_tax_free: int, amount_vat: int,
-                 amount_service_fee: int, time_created:str,
+                 amount_service_fee: int, time_created: str,
                  time_pay_complete: str,
                  time_pay_cancel: str, product_desc: str, has_owner: bool,
                  available_actions: list,

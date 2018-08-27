@@ -38,13 +38,13 @@ def test_purchase():
     assert result.purchase_url is not None
     assert isinstance(result, PurchaseResult)
 
-    result = c.purchase(order_id, 0, 'test', '', True,
-                        auto_execute=True, result_callback='test')
-    assert isinstance(result, APIError)
-    assert result.data["status"] == 200
-    assert result.data["code"] == -1
-    assert result.msg == '요청한 값이 부족하거나 올바르지 않습니다. amount는 0보다 커야 합니다.'
-    assert result.data["errorCode"] == 'COMMON_INVALID_PARAMETER'
+    with pytest.raises(APIError) as result:
+        c.purchase(order_id, 0, 'test', '', True,
+                   auto_execute=True, result_callback='test')
+        assert result.data["status"] == 200
+        assert result.data["code"] == -1
+        assert result.msg == '요청한 값이 부족하거나 올바르지 않습니다. amount는 0보다 커야 합니다.'
+        assert result.data["errorCode"] == 'COMMON_INVALID_PARAMETER'
 
 
 def test_get_payment():
@@ -78,10 +78,9 @@ def test_confirm_purchase():
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
     payment = c.get_payment(purchase_result.pay_token)
 
-    approved_result = c.approve(payment.pay_token)
-
-    assert isinstance(approved_result, APIError)
-    assert approved_result.msg == '사용자 정보가 존재하지 않습니다.'
+    with pytest.raises(APIError) as approved_result:
+        c.approve(payment.pay_token)
+        assert approved_result.msg == '사용자 정보가 존재하지 않습니다.'
 
     result = c.purchase(order_id, 40000, 'test', '', True)
     payment = c.get_payment(result.pay_token)
@@ -130,9 +129,10 @@ def test_cancel_purchase():
         m.post('https://pay.toss.im/api/v1/cancel',
                text='{"code": -1, "errorCode": "CANCEL_IMPOSSIBLE_STATUS", '
                     '"status": 200, "msg": "취소가 불가능한 상태입니다."}')
-        cancelled_result = c.cancel(token, 'test')
-        assert isinstance(cancelled_result, APIError)
-        assert cancelled_result.data['errorCode'] == 'CANCEL_IMPOSSIBLE_STATUS'
+        with pytest.raises(APIError) as cancelled_result:
+            c.cancel(token, 'test')
+            assert isinstance(cancelled_result, APIError)
+            assert cancelled_result.data['errorCode'] == 'CANCEL_IMPOSSIBLE_STATUS'  # noqa
 
 
 def test_cancel_refund():
@@ -141,8 +141,9 @@ def test_cancel_refund():
     order_id = str(uuid4())
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
     payment = c.get_payment(purchase_result.pay_token)
-    refund_result = c.refund(payment.pay_token, 40000, 0)
-    assert isinstance(refund_result, APIError)
+    with pytest.raises(APIError) as refund_result:
+        c.refund(payment.pay_token, 40000, 0)
+        assert isinstance(refund_result, APIError)
 
     # NOTE: toss user-side auth 가 자동화될 수가 없어 mocking 으로 우회
     # NOTE: 이후는 승인되었다고 가정
