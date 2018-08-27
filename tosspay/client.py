@@ -22,8 +22,10 @@ class TossPayClient:
     sandbox_key = 'sk_test_apikey1234567890'
     development = True
 
-    def __init__(self, production_api_key=None, development_api_key=None,
-                 development=True):
+    def __init__(self,
+                 production_api_key: str=None,
+                 development_api_key: str=None,
+                 development: bool=True):
         self.production_api_key = production_api_key or self.sandbox_key
         self.development_api_key = development_api_key or self.sandbox_key
         self.development = development
@@ -34,11 +36,11 @@ class TossPayClient:
             return self.development_api_key
         return self.production_api_key
 
-    def build_url(self, uri):
+    def build_url(self, uri: str) -> str:
         return urljoin(self.base_url,
                        urljoin('/api/{}/'.format(self.api_version), uri))
 
-    def request(self, method, uri, params):
+    def request(self, method: str, uri: str, params: dict) -> APIResponse:
         params['apiKey'] = self.api_key
 
         filtered = {}
@@ -56,14 +58,26 @@ class TossPayClient:
 
         return APIResponse(**jsonized)
 
-    def purchase(self, order_no, amount, product_desc, ret_url, cash_receipt,
-                 amount_tax_free=0, auto_execute=False, amount_taxable=0,
-                 amount_vat=0, amount_service_fee=0,
-                 expired_time=datetime.timedelta(minutes=15),
-                 result_callback='', escrow=False,
-                 checkout_type='web', ars_auth_skippable='Y',
-                 user_phone='', partner_id='',
-                 metadata='', ret_cancel_url=''):
+    def purchase(self,
+                 order_no: str,
+                 amount: int,
+                 product_desc: str,
+                 ret_url: str,
+                 cash_receipt: bool,
+                 amount_tax_free: int=0,
+                 auto_execute: bool=False,
+                 amount_taxable: int=0,
+                 amount_vat: int=0,
+                 amount_service_fee: int=0,
+                 expired_time: datetime=datetime.timedelta(minutes=15),
+                 result_callback: str='',
+                 escrow: bool=False,
+                 checkout_type: str='web',
+                 ars_auth_skippable: str='Y',
+                 user_phone: str='',
+                 partner_id: str='',
+                 metadata: str='',
+                 ret_cancel_url: str='') -> (PurchaseResult or APIResponse):
 
         if not result_callback and auto_execute:
             raise NotAutoExecutable
@@ -107,7 +121,7 @@ class TossPayClient:
                               client=self,
                               code=result.data["code"])
 
-    def get_payment(self, pay_token=None, order_no=None):
+    def get_payment(self, pay_token: str=None, order_no: str=None) -> Payment:
         if not pay_token and order_no:
             raise ValueError("`pay_token` or `order_no` is necessary")
 
@@ -118,7 +132,10 @@ class TossPayClient:
 
         return Payment(**params)
 
-    def approve(self, pay_token, amount=None, order_no=None):
+    def approve(self,
+                pay_token: str,
+                amount: int=None,
+                order_no: int=None) -> (APIResponse or ApprovedResult):
 
         params = {'payToken': pay_token}
 
@@ -135,7 +152,7 @@ class TossPayClient:
         return ApprovedResult(code=result.data['code'],
                               approved_at=result.data['approvalTime'])
 
-    def cancel(self, pay_token, reason):
+    def cancel(self, pay_token: str, reason: str) -> APIResponse:
 
         params = {'payToken': pay_token, 'reason': reason}
 
@@ -146,10 +163,15 @@ class TossPayClient:
 
         return CancelledResult(code=result.data['code'])
 
-    def refund(self, pay_token, amount, amount_tax_free, refund_no=None,
-               reason=None,
-               amount_taxable=None,
-               amount_vat=None, amount_service_fee=None):
+    def refund(self,
+               pay_token: str,
+               amount: int,
+               amount_tax_free: int,
+               refund_no: str=None,
+               reason: str=None,
+               amount_taxable: int=None,
+               amount_vat: int=None,
+               amount_service_fee: int=None) -> APIResponse:
 
         params = {'payToken': pay_token, 'refundNo': refund_no,
                   'reason': reason, 'amount': amount,

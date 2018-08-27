@@ -63,7 +63,7 @@ def test_purchase_result():
 
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
 
-    payment = purchase_result.payment
+    payment = c.get_payment(purchase_result.pay_token)
 
     assert isinstance(payment, Payment)
     assert payment.amount == 40000
@@ -76,7 +76,7 @@ def test_confirm_purchase():
     c = tosspay.TossPayClient(development=True)
     order_id = str(uuid4())
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
-    payment = purchase_result.payment
+    payment = c.get_payment(purchase_result.pay_token)
 
     approved_result = c.approve(payment.pay_token)
 
@@ -84,7 +84,8 @@ def test_confirm_purchase():
     assert approved_result.msg == '사용자 정보가 존재하지 않습니다.'
 
     result = c.purchase(order_id, 40000, 'test', '', True)
-    token = result.payment.pay_token
+    payment = c.get_payment(result.pay_token)
+    token = payment.pay_token
 
     with requests_mock.Mocker() as m:
         # NOTE: toss user-side auth 가 자동화될 수가 없어 mocking 으로 우회
@@ -100,7 +101,7 @@ def test_cancel_purchase():
     c = tosspay.TossPayClient(development=True)
     order_id = str(uuid4())
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
-    payment = purchase_result.payment
+    payment = c.get_payment(purchase_result.pay_token)
 
     cancelled_result = c.cancel(payment.pay_token, 'test cancel')
 
@@ -109,14 +110,16 @@ def test_cancel_purchase():
     order_id = str(uuid4())
     pr = c.purchase(order_id, 40000, 'test', '', True, auto_execute=True,
                     result_callback='test')
-
-    cancelled_result = c.cancel(pr.payment.pay_token, 'test cancel')
+    payment = c.get_payment(pr.pay_token)
+    token = payment.pay_token
+    cancelled_result = c.cancel(token, 'test cancel')
 
     assert isinstance(cancelled_result, CancelledResult)
 
     order_id = str(uuid4())
     result = c.purchase(order_id, 40000, 'test', '', True)
-    token = result.payment.pay_token
+    payment = c.get_payment(result.pay_token)
+    token = payment.pay_token
 
     with requests_mock.Mocker() as m:
         # NOTE: toss user-side auth 가 자동화될 수가 없어 mocking 으로 우회
@@ -137,7 +140,7 @@ def test_cancel_refund():
     c = tosspay.TossPayClient(development=True)
     order_id = str(uuid4())
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
-    payment = purchase_result.payment
+    payment = c.get_payment(purchase_result.pay_token)
     refund_result = c.refund(payment.pay_token, 40000, 0)
     assert isinstance(refund_result, APIError)
 

@@ -1,3 +1,6 @@
+from tosspay.entity import Payment
+
+
 class APIResponse:
 
     def __new__(cls, *args, **kwargs):
@@ -11,26 +14,21 @@ class APIResponse:
 
 class APIError(APIResponse):
 
-    def __init__(self, msg, **kwargs):
+    def __init__(self, msg: str, **kwargs):
         self.msg = msg
         super(APIError, self).__init__(**kwargs)
 
 
 class PurchaseResult(APIResponse):
-    def __init__(self, pay_token, purchase_url, client=None, *args, **kwargs):
+    def __init__(self, pay_token: str, purchase_url: str, *args, **kwargs):
         self.pay_token = pay_token
         self.purchase_url = purchase_url
-        self._client = client
         super(PurchaseResult, self).__init__(**kwargs)
-
-    @property
-    def payment(self):
-        return self._client.get_payment(self.pay_token)
 
 
 class ApprovedResult(APIResponse):
 
-    def __init__(self, code, approved_at, **kwargs):
+    def __init__(self, code: str, approved_at: str, **kwargs):
         self.code = code
         self.approved_at = approved_at
         super(ApprovedResult, self).__init__(**kwargs)
@@ -43,7 +41,7 @@ class CancelledResult(APIResponse):
 
 class RefundedResult(APIResponse):
 
-    def __init__(self, code, refund_no, approved_at, **kwargs):
+    def __init__(self, code: str, refund_no: str, approved_at: str, **kwargs):
         self.code = code
         self.refund_no = refund_no
         self.approved_at = approved_at
