@@ -2,10 +2,11 @@ from datetime import timedelta
 from uuid import uuid4
 
 import pytest
+import requests_mock
 
 import tosspay
 from tosspay.entity import Payment
-from tosspay.response import APIError, PurchaseResult
+from tosspay.response import APIError, PurchaseResult, ApprovedResult
 
 
 def test_purchase():
@@ -67,3 +68,28 @@ def test_purchase_result():
     assert payment.amount == 40000
     assert payment.product_desc == 'test'
     assert payment.pay_status == 'PAY_STANDBY'
+
+
+def test_confirm_purchase():
+
+    c = tosspay.TossPayClient(development=True)
+    order_id = str(uuid4())
+    purchase_result = c.purchase(order_id, 40000, 'test', '', True)
+    payment = purchase_result.payment
+
+    approved_result = c.approve(payment.pay_token)
+
+    assert isinstance(approved_result, APIError)
+    assert approved_result.msg == '사용자 정보가 존재하지 않습니다.'
+
+    result = c.purchase(order_id, 40000, 'test', '', True)
+    token = result.payment.pay_token
+
+    with requests_mock.Mocker() as m:
+        # NOTE: toss user-side auth 가 자동화될 수가 없어 mocking 으로 우회
+        m.post('https://pay.toss.im/api/v1/execute',
+               text='{"code":0,"approvalTime":"2016-11-16 13:59:59"}')
+        approved_result = c.approve(token)
+
+    assert isinstance(approved_result, ApprovedResult)
+

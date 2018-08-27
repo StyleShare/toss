@@ -8,7 +8,8 @@ import requests
 
 from tosspay.entity import Payment
 from tosspay.exc import NotAutoExecutable
-from tosspay.response import APIResponse, APIError, PurchaseResult
+from tosspay.response import (ApprovedResult, APIResponse, APIError,
+                              PurchaseResult)
 from tosspay.validator import validate_order_number
 
 
@@ -116,3 +117,20 @@ class TossPayClient:
                       for k, v in result.data.items())
 
         return Payment(**params)
+
+    def approve(self, pay_token, amount=None, order_no=None):
+
+        params = {'payToken': pay_token}
+
+        if amount:
+            params['amount'] = amount
+        if order_no:
+            params['orderNo'] = order_no
+
+        result = self.request('post', 'execute', params)
+
+        if result.data['code'] == -1:
+            return result
+
+        return ApprovedResult(code=result.data['code'],
+                              approved_at=result.data['approvalTime'])

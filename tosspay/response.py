@@ -26,3 +26,11 @@ class PurchaseResult(APIResponse):
     @property
     def payment(self):
         return self._client.get_payment(self.pay_token)
+
+
+class ApprovedResult(APIResponse):
+
+    def __init__(self, code, approved_at, **kwargs):
+        self.code = code
+        self.approved_at = approved_at
+        super(ApprovedResult, self).__init__(**kwargs)
