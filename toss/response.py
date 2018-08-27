@@ -1,4 +1,4 @@
-from tosspay.entity import Payment
+from toss.entity import Payment
 
 
 class APIResponse:

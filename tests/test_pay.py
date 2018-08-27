@@ -4,14 +4,14 @@ from uuid import uuid4
 import pytest
 import requests_mock
 
-import tosspay
-from tosspay.entity import Payment
-from tosspay.response import (APIError, PurchaseResult, ApprovedResult,
-                              CancelledResult, RefundedResult)
+import toss
+from toss.entity import Payment
+from toss.response import (APIError, PurchaseResult, ApprovedResult,
+                           CancelledResult, RefundedResult)
 
 
 def test_purchase():
-    c = tosspay.TossPayClient(development=True)
+    c = toss.TossPayClient(development=True)
     order_id = str(uuid4())
 
     with pytest.raises(ValueError):
@@ -21,7 +21,7 @@ def test_purchase():
         c.purchase(order_id, 40000, 'test', '', True,
                    expired_time=timedelta(hours=1, minutes=1))
 
-    with pytest.raises(tosspay.exc.NotAutoExecutable):
+    with pytest.raises(toss.exc.NotAutoExecutable):
         c.purchase(order_id, 40000, 'test', '', True,
                    auto_execute=True)
 
@@ -50,7 +50,7 @@ def test_purchase():
 def test_get_payment():
     pay_token = "N4GOTJB5eR3Tnx8kJeVp90"
 
-    c = tosspay.TossPayClient(development=True)
+    c = toss.TossPayClient(development=True)
     result = c.get_payment(pay_token)
 
     assert isinstance(result, Payment)
@@ -58,7 +58,7 @@ def test_get_payment():
 
 def test_purchase_result():
 
-    c = tosspay.TossPayClient(development=True)
+    c = toss.TossPayClient(development=True)
     order_id = str(uuid4())
 
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
@@ -73,7 +73,7 @@ def test_purchase_result():
 
 def test_confirm_purchase():
 
-    c = tosspay.TossPayClient(development=True)
+    c = toss.TossPayClient(development=True)
     order_id = str(uuid4())
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
     payment = c.get_payment(purchase_result.pay_token)
@@ -98,7 +98,7 @@ def test_confirm_purchase():
 
 def test_cancel_purchase():
 
-    c = tosspay.TossPayClient(development=True)
+    c = toss.TossPayClient(development=True)
     order_id = str(uuid4())
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
     payment = c.get_payment(purchase_result.pay_token)
@@ -137,7 +137,7 @@ def test_cancel_purchase():
 
 def test_cancel_refund():
 
-    c = tosspay.TossPayClient(development=True)
+    c = toss.TossPayClient(development=True)
     order_id = str(uuid4())
     purchase_result = c.purchase(order_id, 40000, 'test', '', True)
     payment = c.get_payment(purchase_result.pay_token)

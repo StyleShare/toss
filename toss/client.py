@@ -6,11 +6,11 @@ import inflection
 import pytz
 import requests
 
-from tosspay.entity import Payment
-from tosspay.exc import NotAutoExecutable
-from tosspay.response import (ApprovedResult, APIResponse, APIError,
-                              PurchaseResult, CancelledResult, RefundedResult)
-from tosspay.validator import validate_order_number
+from toss.entity import Payment
+from toss.exc import NotAutoExecutable
+from toss.response import (ApprovedResult, APIResponse, APIError,
+                           PurchaseResult, CancelledResult, RefundedResult)
+from toss.validator import validate_order_number
 
 
 class TossPayClient:
