@@ -6,7 +6,8 @@ import requests_mock
 
 import tosspay
 from tosspay.entity import Payment
-from tosspay.response import APIError, PurchaseResult, ApprovedResult
+from tosspay.response import (APIError, PurchaseResult, ApprovedResult,
+                              CancelledResult)
 
 
 def test_purchase():
@@ -93,3 +94,39 @@ def test_confirm_purchase():
 
     assert isinstance(approved_result, ApprovedResult)
 
+
+def test_cancel_purchase():
+
+    c = tosspay.TossPayClient(development=True)
+    order_id = str(uuid4())
+    purchase_result = c.purchase(order_id, 40000, 'test', '', True)
+    payment = purchase_result.payment
+
+    cancelled_result = c.cancel(payment.pay_token, 'test cancel')
+
+    assert isinstance(cancelled_result, CancelledResult)
+
+    order_id = str(uuid4())
+    pr = c.purchase(order_id, 40000, 'test', '', True, auto_execute=True,
+                    result_callback='test')
+
+    cancelled_result = c.cancel(pr.payment.pay_token, 'test cancel')
+
+    assert isinstance(cancelled_result, CancelledResult)
+
+    order_id = str(uuid4())
+    result = c.purchase(order_id, 40000, 'test', '', True)
+    token = result.payment.pay_token
+
+    with requests_mock.Mocker() as m:
+        # NOTE: toss user-side auth 가 자동화될 수가 없어 mocking 으로 우회
+        m.post('https://pay.toss.im/api/v1/execute',
+               text='{"code":0,"approvalTime":"2016-11-16 13:59:59"}')
+        c.approve(token)
+        # NOTE: 승인이 되어 결제가 완료된 시점에서는 취소가 불가능함
+        m.post('https://pay.toss.im/api/v1/cancel',
+               text='{"code": -1, "errorCode": "CANCEL_IMPOSSIBLE_STATUS", '
+                    '"status": 200, "msg": "취소가 불가능한 상태입니다."}')
+        cancelled_result = c.cancel(token, 'test')
+        assert isinstance(cancelled_result, APIError)
+        assert cancelled_result.data['errorCode'] == 'CANCEL_IMPOSSIBLE_STATUS'

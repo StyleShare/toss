@@ -34,3 +34,8 @@ class ApprovedResult(APIResponse):
         self.code = code
         self.approved_at = approved_at
         super(ApprovedResult, self).__init__(**kwargs)
+
+
+class CancelledResult(APIResponse):
+
+    pass

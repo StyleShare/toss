@@ -9,7 +9,7 @@ import requests
 from tosspay.entity import Payment
 from tosspay.exc import NotAutoExecutable
 from tosspay.response import (ApprovedResult, APIResponse, APIError,
-                              PurchaseResult)
+                              PurchaseResult, CancelledResult)
 from tosspay.validator import validate_order_number
 
 
@@ -134,3 +134,14 @@ class TossPayClient:
 
         return ApprovedResult(code=result.data['code'],
                               approved_at=result.data['approvalTime'])
+
+    def cancel(self, pay_token, reason):
+
+        params = {'payToken': pay_token, 'reason': reason}
+
+        result = self.request('post', 'cancel', params)
+
+        if result.data['code'] == -1:
+            return result
+
+        return CancelledResult(code=result.data['code'])
