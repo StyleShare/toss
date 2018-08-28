@@ -76,7 +76,7 @@ class TossPayClient:
                  user_phone: str='',
                  partner_id: str='',
                  metadata: str='',
-                 ret_cancel_url: str='') -> (PurchaseResult or APIResponse):
+                 ret_cancel_url: str='') -> PurchaseResult:
 
         if not result_callback and auto_execute:
             raise NotAutoExecutable
@@ -112,9 +112,6 @@ class TossPayClient:
 
         result = self.request('post', 'payments', basic_params)
 
-        if result.data['code'] == -1:
-            return result
-
         return PurchaseResult(pay_token=result.data["payToken"],
                               purchase_url=result.data["checkoutPage"],
                               client=self,
@@ -134,7 +131,7 @@ class TossPayClient:
     def approve(self,
                 pay_token: str,
                 amount: int=None,
-                order_no: int=None) -> (APIResponse or ApprovedResult):
+                order_no: int=None) -> ApprovedResult:
 
         params = {'payToken': pay_token}
 
@@ -145,20 +142,14 @@ class TossPayClient:
 
         result = self.request('post', 'execute', params)
 
-        if result.data['code'] == -1:
-            return result
-
         return ApprovedResult(code=result.data['code'],
                               approved_at=result.data['approvalTime'])
 
-    def cancel(self, pay_token: str, reason: str) -> APIResponse:
+    def cancel(self, pay_token: str, reason: str) -> CancelledResult:
 
         params = {'payToken': pay_token, 'reason': reason}
 
         result = self.request('post', 'cancel', params)
-
-        if result.data['code'] == -1:
-            return result
 
         return CancelledResult(code=result.data['code'])
 
@@ -170,7 +161,7 @@ class TossPayClient:
                reason: str=None,
                amount_taxable: int=None,
                amount_vat: int=None,
-               amount_service_fee: int=None) -> APIResponse:
+               amount_service_fee: int=None) -> RefundedResult:
 
         params = {'payToken': pay_token, 'refundNo': refund_no,
                   'reason': reason, 'amount': amount,
@@ -179,9 +170,6 @@ class TossPayClient:
                   'amountServiceFee': amount_service_fee}
 
         result = self.request('post', 'refunds', params)
-
-        if result.data['code'] == -1:
-            return result
 
         return RefundedResult(code=result.data['code'],
                               refund_no=result.data['refundNo'],
