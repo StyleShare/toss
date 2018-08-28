@@ -9,12 +9,11 @@ import requests
 from toss.entity import Payment
 from toss.exc import NotAutoExecutable
 from toss.response import (ApprovedResult, APIResponse, APIError,
-                           PurchaseResult, CancelledResult, RefundedResult)
+                           PurchasedResult, CancelledResult, RefundedResult)
 from toss.validator import validate_order_number
 
 
 class TossPayClient:
-
     base_url = 'https://pay.toss.im/'
     api_version = 'v1'
     production_api_key = 'sk_test_apikey1234567890'
@@ -23,9 +22,9 @@ class TossPayClient:
     development = True
 
     def __init__(self,
-                 production_api_key: str=None,
-                 development_api_key: str=None,
-                 development: bool=True):
+                 production_api_key: str = None,
+                 development_api_key: str = None,
+                 development: bool = True):
         self.production_api_key = production_api_key or self.sandbox_key
         self.development_api_key = development_api_key or self.sandbox_key
         self.development = development
@@ -63,20 +62,20 @@ class TossPayClient:
                  product_desc: str,
                  ret_url: str,
                  cash_receipt: bool,
-                 amount_tax_free: int=0,
-                 auto_execute: bool=False,
-                 amount_taxable: int=0,
-                 amount_vat: int=0,
-                 amount_service_fee: int=0,
-                 expired_time: datetime=datetime.timedelta(minutes=15),
-                 result_callback: str='',
-                 escrow: bool=False,
-                 checkout_type: str='web',
-                 ars_auth_skippable: str='Y',
-                 user_phone: str='',
-                 partner_id: str='',
-                 metadata: str='',
-                 ret_cancel_url: str='') -> PurchaseResult:
+                 amount_tax_free: int = 0,
+                 auto_execute: bool = False,
+                 amount_taxable: int = 0,
+                 amount_vat: int = 0,
+                 amount_service_fee: int = 0,
+                 expired_time: datetime = datetime.timedelta(minutes=15),
+                 result_callback: str = '',
+                 escrow: bool = False,
+                 checkout_type: str = 'web',
+                 ars_auth_skippable: str = 'Y',
+                 user_phone: str = '',
+                 partner_id: str = '',
+                 metadata: str = '',
+                 ret_cancel_url: str = '') -> PurchasedResult:
 
         if not result_callback and auto_execute:
             raise NotAutoExecutable
@@ -96,8 +95,8 @@ class TossPayClient:
             "amountVat": amount_vat or None,
             "amountServiceFee": amount_service_fee or None,
             "expiredTime": (
-                datetime.datetime.now(
-                    tz=pytz.timezone('Asia/Seoul')) + expired_time
+                    datetime.datetime.now(
+                        tz=pytz.timezone('Asia/Seoul')) + expired_time
             ).strftime("%Y-%m-%d %H:%M:%S"),
             "resultCallback": result_callback or None,
             "escrow": escrow or None,
@@ -112,12 +111,13 @@ class TossPayClient:
 
         result = self.request('post', 'payments', basic_params)
 
-        return PurchaseResult(pay_token=result.data["payToken"],
-                              purchase_url=result.data["checkoutPage"],
-                              client=self,
-                              code=result.data["code"])
+        return PurchasedResult(pay_token=result.data["payToken"],
+                               purchase_url=result.data["checkoutPage"],
+                               client=self,
+                               code=result.data["code"])
 
-    def get_payment(self, pay_token: str=None, order_no: str=None) -> Payment:
+    def get_payment(self, pay_token: str = None,
+                    order_no: str = None) -> Payment:
         if not pay_token and order_no:
             raise ValueError("`pay_token` or `order_no` is necessary")
 
@@ -126,12 +126,12 @@ class TossPayClient:
         params = dict((inflection.underscore(k), v)
                       for k, v in result.data.items())
 
-        return Payment(**params)
+        return Payment(client=self, **params)
 
     def approve(self,
                 pay_token: str,
-                amount: int=None,
-                order_no: int=None) -> ApprovedResult:
+                amount: int = None,
+                order_no: int = None) -> ApprovedResult:
 
         params = {'payToken': pay_token}
 
@@ -157,11 +157,11 @@ class TossPayClient:
                pay_token: str,
                amount: int,
                amount_tax_free: int,
-               refund_no: str=None,
-               reason: str=None,
-               amount_taxable: int=None,
-               amount_vat: int=None,
-               amount_service_fee: int=None) -> RefundedResult:
+               refund_no: str = None,
+               reason: str = None,
+               amount_taxable: int = None,
+               amount_vat: int = None,
+               amount_service_fee: int = None) -> RefundedResult:
 
         params = {'payToken': pay_token, 'refundNo': refund_no,
                   'reason': reason, 'amount': amount,

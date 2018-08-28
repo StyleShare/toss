@@ -19,11 +19,11 @@ class APIError(APIResponse, TossPayException):
         super(APIError, self).__init__(**kwargs)
 
 
-class PurchaseResult(APIResponse):
+class PurchasedResult(APIResponse):
     def __init__(self, pay_token: str, purchase_url: str, *args, **kwargs):
         self.pay_token = pay_token
         self.purchase_url = purchase_url
-        super(PurchaseResult, self).__init__(**kwargs)
+        super(PurchasedResult, self).__init__(**kwargs)
 
 
 class ApprovedResult(APIResponse):
@@ -35,7 +35,6 @@ class ApprovedResult(APIResponse):
 
 
 class CancelledResult(APIResponse):
-
     pass
 
 
