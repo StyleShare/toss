@@ -21,6 +21,6 @@ setuptools.setup(
     install_requires=[
         'inflection==0.3.1',
         'pytz==2018.5',
-        'requests==2.19.1'
+        'requests==2.20.1'
     ]
 )
