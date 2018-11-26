@@ -2,6 +2,8 @@
 
 Toss 결제를 위한 python client library wrapper (본격 날로 먹기의 꿈)
 
+[![CircleCI](https://circleci.com/gh/StyleShare/toss.svg?style=svg)](https://circleci.com/gh/StyleShare/toss)
+
 ## 참고자료
 
 - [가입부터 결제 완료까지](https://tossdev.github.io/gettingstarted.html)

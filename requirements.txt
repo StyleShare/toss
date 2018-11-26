@@ -1,3 +1,5 @@
 inflection 
 pytz
-requests
+requests>=2.20.0
+requests-mock
+pytest
