@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="toss",
-    version="0.0.1",
-    author="Sungyong Kang",
-    author_email="hiye@styleshare.kr",
+    version="0.0.2a",
+    author="Styleshare",
+    author_email="dev@styleshare.kr",
     description="Toss payment client library",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -20,7 +20,7 @@ setuptools.setup(
     ],
     install_requires=[
         'inflection==0.3.1',
-        'pytz==2018.5',
+        'pytz==2018.7',
         'requests==2.20.1'
     ]
 )
